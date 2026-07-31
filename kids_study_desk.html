@@ -6,61 +6,62 @@
 <title>甲贺忍蛙大冒险</title>
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{margin:0;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#e8f4fd;color:#1a4a7a;font-size:16px}
-  .app{max-width:1200px;margin:0 auto;background:linear-gradient(180deg,#e8f4fd 0%,#c8e8f8 100%);min-height:100vh;padding-bottom:40px}
-  .topbar{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:6px 16px;padding:14px 24px;background:linear-gradient(90deg,#3a7bd5,#2b5fa3);color:#fff;text-align:center}
-  .topbar .title{font-size:24px;font-weight:bold;width:100%;order:0}
-  .topbar .datetime{font-size:14px;opacity:.95;order:1;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-  .topbar .datetime span{background:rgba(255,255,255,.15);padding:3px 12px;border-radius:12px}
-  .topbar .streak{font-size:14px;order:2}
-  .topbar .streak b{color:#ffd84d;font-size:16px}
-  .points{background:#ffd84d;color:#5a4500;padding:8px 20px;border-radius:20px;font-size:18px;font-weight:bold;order:3}
-  /* 三栏布局 */
-  .layout{display:grid;grid-template-columns:140px 1fr 260px;gap:14px;padding:14px}
+  body{margin:0;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#e8f4fd;color:#1a4a7a;font-size:20px}
+  .app{max-width:1400px;margin:0 auto;background:linear-gradient(180deg,#e8f4fd 0%,#c8e8f8 100%);min-height:100vh;padding-bottom:40px}
+  .topbar{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:10px 18px;padding:18px 24px;background:linear-gradient(90deg,#3a7bd5,#2b5fa3);color:#fff;text-align:center}
+  .topbar .title{font-size:30px;font-weight:bold;width:100%;order:0}
+  /* 记分牌样式 */
+  .topbar .streak{order:1;display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#fff8d4,#ffd84d);color:#5a4500;padding:10px 28px;border-radius:18px;box-shadow:0 4px 10px rgba(0,0,0,.18),inset 0 -3px 0 rgba(180,120,0,.25);border:2px solid #ffb800}
+  .topbar .streak .label{font-size:18px;font-weight:bold;letter-spacing:1px}
+  .topbar .streak .scoreboard{display:inline-flex;align-items:baseline;background:linear-gradient(180deg,#2a2a2a,#0a0a0a);color:#ff3030;padding:6px 14px;border-radius:8px;font-family:"Courier New",monospace;font-size:32px;font-weight:bold;line-height:1;min-width:80px;justify-content:center;box-shadow:inset 0 2px 6px rgba(255,80,80,.4),0 2px 3px rgba(0,0,0,.3);text-shadow:0 0 8px rgba(255,60,60,.7)}
+  .topbar .streak .unit{font-size:18px;font-weight:bold;color:#5a4500}
+  .topbar .points{order:2;background:#ffd84d;color:#5a4500;padding:10px 24px;border-radius:20px;font-size:22px;font-weight:bold}
+  /* 三栏布局：左侧学科 | 中间任务(2/3) | 右侧宠物+商店(更宽) */
+  .layout{display:grid;grid-template-columns:160px minmax(0,2fr) minmax(0,1.4fr);gap:16px;padding:16px}
   /* 左侧学科导航 */
-  .subj{display:flex;flex-direction:column;gap:8px;padding:12px;background:#fff;border-radius:16px;box-shadow:0 4px 12px rgba(43,95,163,.12);position:sticky;top:14px;align-self:start}
-  .subj-btn{padding:14px 8px;border:none;border-radius:12px;background:#eef6ff;color:#2b5fa3;font-size:16px;font-weight:bold;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.2s}
+  .subj{display:flex;flex-direction:column;gap:10px;padding:14px;background:#fff;border-radius:16px;box-shadow:0 4px 12px rgba(43,95,163,.12);position:sticky;top:14px;align-self:start}
+  .subj-btn{padding:18px 8px;border:none;border-radius:14px;background:#eef6ff;color:#2b5fa3;font-size:20px;font-weight:bold;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:.2s}
   .subj-btn.active{background:linear-gradient(135deg,#3a7bd5,#2b5fa3);color:#fff;box-shadow:0 3px 8px rgba(43,95,163,.3)}
-  .subj-btn .icon{font-size:26px}
-  .subj-btn .text{font-size:14px}
+  .subj-btn .icon{font-size:32px}
+  .subj-btn .text{font-size:18px}
   /* 中间任务区 */
-  .tasks h2{margin:4px 4px 10px;font-size:22px;color:#1a4a7a;display:flex;align-items:center;gap:6px}
-  .progress{background:#fff;padding:8px 14px;border-radius:10px;margin-bottom:8px;font-size:15px;color:#2b5fa3}
-  .progress .pct{float:right;color:#3a7bd5;font-weight:bold}
-  .task{background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:6px;box-shadow:0 2px 6px rgba(43,95,163,.08)}
-  .taskgroup{margin-bottom:10px}
-  .tg-head{font-size:17px;font-weight:bold;color:#2b5fa3;margin:6px 4px;padding-left:8px;border-left:4px solid #3a7bd5}
+  .tasks h2{margin:4px 4px 12px;font-size:26px;color:#1a4a7a;display:flex;align-items:center;gap:6px}
+  .progress{background:#fff;padding:10px 16px;border-radius:10px;margin-bottom:10px;font-size:18px;color:#2b5fa3}
+  .progress .pct{float:right;color:#3a7bd5;font-weight:bold;font-size:20px}
+  .task{background:#fff;border-radius:14px;padding:14px 18px;margin-bottom:8px;box-shadow:0 2px 6px rgba(43,95,163,.08)}
+  .taskgroup{margin-bottom:12px}
+  .tg-head{font-size:20px;font-weight:bold;color:#2b5fa3;margin:8px 4px;padding-left:10px;border-left:4px solid #3a7bd5}
   .task .head{display:none}
-  .item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:17px;border-bottom:1px solid #eef6ff}
+  .item{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:20px;border-bottom:1px solid #eef6ff}
   .item:last-child{border-bottom:none}
-  .item input[type=checkbox]{width:26px;height:26px;accent-color:#3a7bd5;cursor:pointer;flex-shrink:0}
+  .item input[type=checkbox]{width:28px;height:28px;accent-color:#3a7bd5;cursor:pointer;flex-shrink:0}
   .item .label{flex:1;color:#1a4a7a}
   .item.done .label{text-decoration:line-through;color:#9ab8d5}
-  .item .reward{background:#ffe6a8;color:#8a6500;padding:3px 10px;border-radius:10px;font-size:13px;font-weight:bold;white-space:nowrap}
-  .item .link{background:#d0e8ff;color:#2b5fa3;padding:4px 12px;border-radius:10px;font-size:13px;border:none;cursor:pointer;text-decoration:none;white-space:nowrap}
+  .item .reward{background:#ffe6a8;color:#8a6500;padding:4px 12px;border-radius:10px;font-size:15px;font-weight:bold;white-space:nowrap}
+  .item .link{background:#d0e8ff;color:#2b5fa3;padding:5px 14px;border-radius:10px;font-size:14px;border:none;cursor:pointer;text-decoration:none;white-space:nowrap}
   /* 右侧宠物+商店 */
   .side{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 40px);overflow-y:auto}
   .side::-webkit-scrollbar{width:4px}
   .side::-webkit-scrollbar-thumb{background:#b0d0f0;border-radius:2px}
-  .pet-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 3px 8px rgba(43,95,163,.08);margin-bottom:10px}
-  .pet-card .avatar{font-size:72px;line-height:1;filter:drop-shadow(0 2px 4px rgba(255,200,0,.4))}
-  .pet-card .name{font-weight:bold;color:#1a4a7a;margin-top:4px;font-size:19px}
-  .pet-card .level{display:inline-block;background:#ffd84d;color:#8a6500;padding:2px 10px;border-radius:10px;font-size:13px;margin-left:4px}
-  .pet-card .status{font-size:14px;color:#5a8ab5;margin-top:3px}
-  .pet-card .bar{height:7px;background:#eef6ff;border-radius:4px;margin:5px 6px;overflow:hidden}
-  .pet-card .bar i{display:block;height:100%;border-radius:4px;transition:width .4s}
+  .pet-card{background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 3px 8px rgba(43,95,163,.08);margin-bottom:12px}
+  .pet-card .avatar{font-size:88px;line-height:1;filter:drop-shadow(0 2px 4px rgba(255,200,0,.4))}
+  .pet-card .name{font-weight:bold;color:#1a4a7a;margin-top:6px;font-size:22px}
+  .pet-card .level{display:inline-block;background:#ffd84d;color:#8a6500;padding:3px 12px;border-radius:10px;font-size:15px;margin-left:6px}
+  .pet-card .status{font-size:16px;color:#5a8ab5;margin-top:5px}
+  .pet-card .bar{height:10px;background:#eef6ff;border-radius:5px;margin:6px 8px;overflow:hidden}
+  .pet-card .bar i{display:block;height:100%;border-radius:5px;transition:width .4s}
   .pet-card .bar.hunger i{background:linear-gradient(90deg,#ffb56b,#ff7e5f)}
   .pet-card .bar.mood i{background:linear-gradient(90deg,#ffd84d,#ffb800)}
   .pet-card .bar.power i{background:linear-gradient(90deg,#5a9cef,#2b5fa3)}
-  .pet-card .bubble{background:#fff4d0;border-radius:10px;padding:10px;font-size:14px;color:#1a4a7a;margin-top:8px;line-height:1.5;border:1px solid #ffe6a8}
-  .shop{background:#fff;border-radius:14px;padding:12px;box-shadow:0 3px 8px rgba(43,95,163,.08)}
-  .shop h3{margin:0 0 8px;font-size:17px;color:#1a4a7a;display:flex;align-items:center;gap:6px}
-  .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .good{background:#eef6ff;border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:.2s}
+  .pet-card .bubble{background:#fff4d0;border-radius:10px;padding:12px;font-size:16px;color:#1a4a7a;margin-top:10px;line-height:1.5;border:1px solid #ffe6a8}
+  .shop{background:#fff;border-radius:14px;padding:14px;box-shadow:0 3px 8px rgba(43,95,163,.08)}
+  .shop h3{margin:0 0 10px;font-size:20px;color:#1a4a7a;display:flex;align-items:center;gap:6px}
+  .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .good{background:#eef6ff;border-radius:12px;padding:10px;text-align:center;cursor:pointer;transition:.2s}
   .good:active{transform:scale(.95)}
-  .good .emoji{font-size:32px}
-  .good .gname{font-size:13px;color:#1a4a7a;margin-top:2px}
-  .good .gprice{font-size:13px;color:#8a6500;font-weight:bold}
+  .good .emoji{font-size:38px}
+  .good .gname{font-size:15px;color:#1a4a7a;margin-top:4px}
+  .good .gprice{font-size:15px;color:#8a6500;font-weight:bold}
   .good.disabled{opacity:.4;pointer-events:none}
   .modal{position:fixed;inset:0;background:rgba(20,50,90,.5);display:none;align-items:center;justify-content:center;z-index:99}
   .modal.show{display:flex}
@@ -68,19 +69,23 @@
   .modal-box .m-emoji{font-size:72px}
   .modal-box .m-msg{font-size:18px;color:#1a4a7a;margin:14px 0;line-height:1.6}
   .modal-box button{background:linear-gradient(135deg,#3a7bd5,#2b5fa3);color:#fff;border:none;padding:12px 32px;border-radius:20px;font-size:18px;font-weight:bold;cursor:pointer}
-  .reset-btn{display:block;margin:8px 0;padding:8px;border:1px dashed #7ab0e0;background:transparent;color:#5a8ab5;border-radius:12px;font-size:14px;width:100%;cursor:pointer}
+  .reset-btn{display:block;margin:8px 0;padding:10px;border:1px dashed #7ab0e0;background:transparent;color:#5a8ab5;border-radius:12px;font-size:16px;width:100%;cursor:pointer}
   /* 手机竖屏：单列 */
   @media (max-width:600px){
     .app{max-width:480px}
+    body{font-size:18px}
     .layout{grid-template-columns:1fr;gap:10px;padding:10px}
     .subj{flex-direction:row;flex-wrap:wrap;position:static}
-    .subj-btn{flex:1 1 30%;flex-direction:row}
+    .subj-btn{flex:1 1 30%;flex-direction:row;font-size:18px;padding:10px 6px}
+    .subj-btn .icon{font-size:24px}
+    .subj-btn .text{font-size:16px}
     .side{position:static;max-height:none}
-    .pet-card .avatar{font-size:80px}
+    .pet-card .avatar{font-size:96px}
+    .topbar .streak .scoreboard{font-size:28px;min-width:60px}
   }
   /* iPad竖版：两栏 */
   @media (min-width:601px) and (max-width:900px){
-    .layout{grid-template-columns:120px 1fr;gap:12px}
+    .layout{grid-template-columns:140px 1fr;gap:12px}
     .side{grid-column:1/3;position:static;max-height:none}
     .side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   }
@@ -90,11 +95,11 @@
 <div class="app">
   <div class="topbar">
     <div class="title" id="appTitle">甲贺忍蛙大冒险</div>
-    <div class="datetime">
-      <span id="dateText">📅 --</span>
-      <span id="clockText">🕐 --:--</span>
+    <div class="streak">
+      <span class="label">🔥 已打卡</span>
+      <span class="scoreboard" id="streakDays">0</span>
+      <span class="unit">天</span>
     </div>
-    <div class="streak">🔥 已连续打卡 <b id="streakDays">0</b> 天</div>
     <div class="points">⭐累计 <span id="points">0</span></div>
   </div>
   <div class="layout">
@@ -349,44 +354,14 @@ function renderPet(){
 
 function renderAll(){ renderTasks(); renderShop(); renderPet(); $('points').textContent = state.points; $('totalDone').textContent = state.totalDone||0; updateStreak(); }
 
-/* 计算连续打卡天数 */
+/* 累计打卡天数：所有打卡的日期总数（不去重连续） */
 function calcStreak(){
-  if(!state.checkDates || state.checkDates.length === 0) return 0;
-  const dates = [...state.checkDates].sort();
-  const today = todayStr();
-  const yesterday = dateOffsetStr(-1);
-  // 如果今天或昨天没打卡，连续中断
-  if(!dates.includes(today) && !dates.includes(yesterday)) return 0;
-  // 从最近一天往前数连续天数
-  let streak = 0;
-  let checkDay = dates.includes(today) ? today : yesterday;
-  while(dates.includes(checkDay)){
-    streak++;
-    checkDay = dateOffsetStr(-streak, today);
-  }
-  return streak;
+  if(!state.checkDates) return 0;
+  return state.checkDates.length;
 }
 
 function updateStreak(){
   $('streakDays').textContent = calcStreak();
-}
-
-/* 日期时间工具 */
-function dateOffsetStr(offset, base){
-  const d = base ? new Date(base) : new Date();
-  d.setDate(d.getDate() + offset);
-  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-}
-
-function updateClock(){
-  const now = new Date();
-  const week = ['日','一','二','三','四','五','六'][now.getDay()];
-  const y = now.getFullYear(), m = now.getMonth()+1, dd = now.getDate();
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mm = String(now.getMinutes()).padStart(2,'0');
-  const ss = String(now.getSeconds()).padStart(2,'0');
-  $('dateText').textContent = `📅 ${y}年${m}月${dd}日 周${week}`;
-  $('clockText').textContent = `🕐 ${hh}:${mm}:${ss}`;
 }
 
 function toggle(subId, idx, el){
@@ -539,8 +514,6 @@ state = load();
 currentSub = 0;
 renderSubjects();
 renderAll();
-updateClock();
-setInterval(updateClock, 1000); // 每秒更新时间
 </script>
 </body>
 </html>
