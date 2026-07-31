@@ -8,14 +8,20 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#e8f4fd;color:#1a4a7a;font-size:20px}
   .app{max-width:1400px;margin:0 auto;background:linear-gradient(180deg,#e8f4fd 0%,#c8e8f8 100%);min-height:100vh;padding-bottom:40px}
-  .topbar{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:10px 18px;padding:18px 24px;background:linear-gradient(90deg,#3a7bd5,#2b5fa3);color:#fff;text-align:center}
-  .topbar .title{font-size:30px;font-weight:bold;width:100%;order:0}
-  /* 记分牌样式 */
-  .topbar .streak{order:1;display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#fff8d4,#ffd84d);color:#5a4500;padding:10px 28px;border-radius:18px;box-shadow:0 4px 10px rgba(0,0,0,.18),inset 0 -3px 0 rgba(180,120,0,.25);border:2px solid #ffb800}
-  .topbar .streak .label{font-size:18px;font-weight:bold;letter-spacing:1px}
-  .topbar .streak .scoreboard{display:inline-flex;align-items:baseline;background:linear-gradient(180deg,#2a2a2a,#0a0a0a);color:#ff3030;padding:6px 14px;border-radius:8px;font-family:"Courier New",monospace;font-size:32px;font-weight:bold;line-height:1;min-width:80px;justify-content:center;box-shadow:inset 0 2px 6px rgba(255,80,80,.4),0 2px 3px rgba(0,0,0,.3);text-shadow:0 0 8px rgba(255,60,60,.7)}
-  .topbar .streak .unit{font-size:18px;font-weight:bold;color:#5a4500}
-  .topbar .points{order:2;background:#ffd84d;color:#5a4500;padding:10px 24px;border-radius:20px;font-size:22px;font-weight:bold}
+  .topbar{display:flex;flex-direction:column;gap:14px;padding:18px 24px 20px;background:linear-gradient(135deg,#3a7bd5,#2b5fa3);color:#fff;box-shadow:0 4px 14px rgba(43,95,163,.2)}
+  /* 问候行 */
+  .greeting-row{width:100%;text-align:center}
+  .greeting{font-size:28px;font-weight:bold;margin:0;letter-spacing:1px}
+  .greeting .emoji{font-size:30px;margin-right:6px}
+  .greeting-sub{font-size:16px;opacity:.92;margin-top:6px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+  .greeting-sub .encourage{font-style:italic}
+  /* 统计卡片容器 */
+  .stats-row{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+  .stat-card{background:#e8f4fd;color:#1a4a7a;padding:14px 28px;border-radius:18px;box-shadow:0 4px 10px rgba(0,0,0,.18),inset 0 -3px 0 rgba(43,95,163,.15);border:2px solid #c8e8f8;min-width:180px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .stat-card .stat-label{font-size:16px;font-weight:bold;color:#2b5fa3;display:flex;align-items:center;gap:4px}
+  .stat-card .stat-value{font-family:"Courier New",monospace;font-size:38px;font-weight:bold;line-height:1.1;background:linear-gradient(180deg,#2a6fdb,#1a4a7a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 1px 0 rgba(255,255,255,.4);min-width:60px}
+  .stat-card .stat-value.gold{background:linear-gradient(180deg,#ff8a00,#c97000);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .stat-card .stat-unit{font-size:14px;color:#5a8ab5;font-weight:bold}
   /* 三栏布局：左侧学科 | 中间任务(2/3) | 右侧宠物+商店(更宽) */
   .layout{display:grid;grid-template-columns:160px minmax(0,2fr) minmax(0,1.4fr);gap:16px;padding:16px}
   /* 左侧学科导航 */
@@ -94,13 +100,25 @@
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="title" id="appTitle">甲贺忍蛙大冒险</div>
-    <div class="streak">
-      <span class="label">🔥 已打卡</span>
-      <span class="scoreboard" id="streakDays">0</span>
-      <span class="unit">天</span>
+    <div class="greeting-row">
+      <h1 class="greeting"><span class="emoji" id="greetEmoji">🌅</span><span id="greetText">早上好呀~</span></h1>
+      <div class="greeting-sub">
+        <span id="dateText">📅 2026年8月1日 周五</span>
+        <span class="encourage">💭 <span id="encourageText">水跃闪亮，准备好特训啦！</span></span>
+      </div>
     </div>
-    <div class="points">⭐累计 <span id="points">0</span></div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">📅 已打卡</div>
+        <div class="stat-value" id="streakDays">0</div>
+        <div class="stat-unit">天</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">⭐ 累计星星</div>
+        <div class="stat-value gold" id="points">0</div>
+        <div class="stat-unit">颗</div>
+      </div>
+    </div>
   </div>
   <div class="layout">
     <div class="subj" id="subjects"></div>
@@ -364,6 +382,50 @@ function updateStreak(){
   $('streakDays').textContent = calcStreak();
 }
 
+/* 顶栏问候语 + 鼓励语 */
+function getGreeting(){
+  const h = new Date().getHours();
+  if(h >= 5 && h < 11) return { emoji:'🌅', text:'早上好呀~' };
+  if(h >= 11 && h < 14) return { emoji:'🌞', text:'中午好呀~' };
+  if(h >= 14 && h < 18) return { emoji:'☀️', text:'下午好呀~' };
+  if(h >= 18 && h < 22) return { emoji:'🌙', text:'晚上好呀~' };
+  return { emoji:'🌜', text:'夜深啦~' };
+}
+
+const ENCOURAGES = [
+  '水跃闪亮，准备好特训啦！',
+  '今天的目标，就决定是你了！',
+  '路卡利欧说：剑与盾都需要练习呀~',
+  '忍蛙陪${name}一起冲刺吧！',
+  '皮神在隔壁喊加油呢~',
+  '今天的训练会变成明天的实力！',
+  '小训练师，出击吧！',
+  '甲贺忍蛙的飞水手里剑已经上膛！',
+  '每完成一项，战斗力就提升一点！',
+  '杰尼龟也在等你超越它哦~',
+  '谁说咸鱼不能翻身？我们要进化！',
+  '今天的你，比昨天更强一点！',
+  '妙蛙种子会用阳光为你加持！',
+  '伊布说：再坚持一下就能进化啦！',
+  '波克比为你撒下幸运星 ✨',
+  '闹钟已经响了，宝可梦们都在等你！'
+];
+
+function updateGreeting(){
+  const g = getGreeting();
+  $('greetEmoji').textContent = g.emoji;
+  $('greetText').textContent = g.text;
+  // 鼓励语取随机 + 持久化，让同一会话不重复
+  if(!state._encourageIdx) state._encourageIdx = Math.floor(Math.random()*ENCOURAGES.length);
+  $('encourageText').textContent = ENCOURAGES[state._encourageIdx].replace('${name}', CONFIG.childName);
+}
+
+function updateDateText(){
+  const d = new Date();
+  const week = ['日','一','二','三','四','五','六'][d.getDay()];
+  $('dateText').textContent = `📅 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 周${week}`;
+}
+
 function toggle(subId, idx, el){
   const sub = CONFIG.subjects.find(s=>s.id===subId);
   const t = (sub.tasks || (sub.groups||[]).flatMap(g=>g.tasks))[idx];
@@ -514,6 +576,8 @@ state = load();
 currentSub = 0;
 renderSubjects();
 renderAll();
+updateGreeting();
+updateDateText();
 </script>
 </body>
 </html>
