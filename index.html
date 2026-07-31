@@ -8,9 +8,13 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#e8f4fd;color:#1a4a7a;font-size:16px}
   .app{max-width:1200px;margin:0 auto;background:linear-gradient(180deg,#e8f4fd 0%,#c8e8f8 100%);min-height:100vh;padding-bottom:40px}
-  .topbar{display:flex;align-items:center;padding:16px 24px;background:linear-gradient(90deg,#3a7bd5,#2b5fa3);color:#fff}
-  .topbar .title{font-size:24px;font-weight:bold;flex:1;text-align:center}
-  .points{background:#ffd84d;color:#5a4500;padding:8px 20px;border-radius:20px;font-size:18px;font-weight:bold}
+  .topbar{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:6px 16px;padding:14px 24px;background:linear-gradient(90deg,#3a7bd5,#2b5fa3);color:#fff;text-align:center}
+  .topbar .title{font-size:24px;font-weight:bold;width:100%;order:0}
+  .topbar .datetime{font-size:14px;opacity:.95;order:1;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .topbar .datetime span{background:rgba(255,255,255,.15);padding:3px 12px;border-radius:12px}
+  .topbar .streak{font-size:14px;order:2}
+  .topbar .streak b{color:#ffd84d;font-size:16px}
+  .points{background:#ffd84d;color:#5a4500;padding:8px 20px;border-radius:20px;font-size:18px;font-weight:bold;order:3}
   /* 三栏布局 */
   .layout{display:grid;grid-template-columns:140px 1fr 260px;gap:14px;padding:14px}
   /* 左侧学科导航 */
@@ -86,6 +90,11 @@
 <div class="app">
   <div class="topbar">
     <div class="title" id="appTitle">甲贺忍蛙大冒险</div>
+    <div class="datetime">
+      <span id="dateText">📅 --</span>
+      <span id="clockText">🕐 --:--</span>
+    </div>
+    <div class="streak">🔥 已连续打卡 <b id="streakDays">0</b> 天</div>
     <div class="points">⭐累计 <span id="points">0</span></div>
   </div>
   <div class="layout">
@@ -162,7 +171,8 @@ const CONFIG = {
         { name: 'Raz', reward: 2, link: '' },
         { name: '背单词', reward: 2 },
         { name: '阅读', reward: 2 },
-        { name: 'Grammar', reward: 3 }
+        { name: 'Grammar', reward: 3 },
+        { name: '剑一', reward: 4 }
       ]
     },
     {
@@ -222,6 +232,7 @@ function load(){
   if(!perm.pet) perm.pet = { ...CONFIG.pet };
   if(!perm.totalDone) perm.totalDone = 0;
   if(!perm.totalStars) perm.totalStars = 0;  // 这就是可用星星
+  if(!perm.checkDates) perm.checkDates = []; // 连续打卡日期记录
 
   // 2. 加载今日打卡状态
   let today;
@@ -238,7 +249,8 @@ function load(){
     done: today.done,
     pet: perm.pet,
     totalDone: perm.totalDone,
-    totalStars: perm.totalStars
+    totalStars: perm.totalStars,
+    checkDates: perm.checkDates
   };
 }
 
@@ -252,7 +264,8 @@ function save(){
   localStorage.setItem(PERM_KEY, JSON.stringify({
     pet: state.pet,
     totalDone: state.totalDone,
-    totalStars: state.totalStars
+    totalStars: state.totalStars,
+    checkDates: state.checkDates
   }));
 }
 
@@ -334,7 +347,47 @@ function renderPet(){
   $('petBubble').textContent = txt;
 }
 
-function renderAll(){ renderTasks(); renderShop(); renderPet(); $('points').textContent = state.points; $('totalDone').textContent = state.totalDone||0; }
+function renderAll(){ renderTasks(); renderShop(); renderPet(); $('points').textContent = state.points; $('totalDone').textContent = state.totalDone||0; updateStreak(); }
+
+/* 计算连续打卡天数 */
+function calcStreak(){
+  if(!state.checkDates || state.checkDates.length === 0) return 0;
+  const dates = [...state.checkDates].sort();
+  const today = todayStr();
+  const yesterday = dateOffsetStr(-1);
+  // 如果今天或昨天没打卡，连续中断
+  if(!dates.includes(today) && !dates.includes(yesterday)) return 0;
+  // 从最近一天往前数连续天数
+  let streak = 0;
+  let checkDay = dates.includes(today) ? today : yesterday;
+  while(dates.includes(checkDay)){
+    streak++;
+    checkDay = dateOffsetStr(-streak, today);
+  }
+  return streak;
+}
+
+function updateStreak(){
+  $('streakDays').textContent = calcStreak();
+}
+
+/* 日期时间工具 */
+function dateOffsetStr(offset, base){
+  const d = base ? new Date(base) : new Date();
+  d.setDate(d.getDate() + offset);
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+function updateClock(){
+  const now = new Date();
+  const week = ['日','一','二','三','四','五','六'][now.getDay()];
+  const y = now.getFullYear(), m = now.getMonth()+1, dd = now.getDate();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  $('dateText').textContent = `📅 ${y}年${m}月${dd}日 周${week}`;
+  $('clockText').textContent = `🕐 ${hh}:${mm}:${ss}`;
+}
 
 function toggle(subId, idx, el){
   const sub = CONFIG.subjects.find(s=>s.id===subId);
@@ -351,6 +404,13 @@ function toggle(subId, idx, el){
     state.pet.mood = Math.min(100, state.pet.mood + 2);
     state.pet.power = Math.min(100, (state.pet.power||10) + 1);
     state.totalDone = (state.totalDone||0) + 1;
+    // 记录今日打卡（用于连续天数统计）
+    const today = todayStr();
+    if(!state.checkDates.includes(today)){
+      state.checkDates.push(today);
+      // 只保留最近90天，避免无限增长
+      if(state.checkDates.length > 90) state.checkDates = state.checkDates.slice(-90);
+    }
     const praises = ['干得漂亮！','水手里剑命中！','忍术升级！','特训完成！','战斗力提升！'];
     // 检查是否升级
     const oldLevel = Math.floor((state.totalDone-1)/5)+1;
@@ -479,6 +539,8 @@ state = load();
 currentSub = 0;
 renderSubjects();
 renderAll();
+updateClock();
+setInterval(updateClock, 1000); // 每秒更新时间
 </script>
 </body>
 </html>
