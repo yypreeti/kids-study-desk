@@ -132,7 +132,7 @@
 
 const CONFIG = {
 
-  appTitle: '⚡ 学习冒险岛 ⚡',
+  appTitle: '甲贺忍蛙大冒险',
   childName: '小训练师',
 
   /* 学科 + 任务 */
@@ -329,7 +329,7 @@ function renderPet(){
   if(state.pet.hungry < 30) txt = `忍术再强也撑不住饥饿……快去商店买点树果补给吧！`;
   else if(state.pet.mood < 40) txt = `状态不佳……买点道具陪我特训一下吧！`;
   else if(state.pet.hungry > 80 && state.pet.mood > 80) txt = `水手里剑准备就绪！今天战斗力满分，感谢${CONFIG.childName}！`;
-  else txt = `${CONFIG.childName}加油！累计完成 ${exp} 项任务，再 ${5-exp%5} 项就升级啦！`;
+  else txt = `${CONFIG.childName}加油！累计完成 ${exp} 项任务，再完成 ${5-exp%5} 项就升级啦！`;
   $('petBubble').textContent = txt;
 }
 
@@ -481,4 +481,3 @@ renderAll();
 </script>
 </body>
 </html>
-
