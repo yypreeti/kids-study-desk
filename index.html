@@ -375,7 +375,14 @@ function renderPet(){
   $('petBubble').textContent = txt;
 }
 
-function renderAll(){ renderTasks(); renderShop(); renderPet(); $('points').textContent = state.points; $('totalDone').textContent = state.totalDone||0; updateStreak(); }
+function renderAll(){
+  try{ renderTasks(); }catch(e){ console.error('renderTasks:',e); }
+  try{ renderShop(); }catch(e){ console.error('renderShop:',e); }
+  try{ renderPet(); }catch(e){ console.error('renderPet:',e); }
+  try{ $('points').textContent = state.points; }catch(e){}
+  try{ $('totalDone').textContent = state.totalDone||0; }catch(e){}
+  try{ updateStreak(); }catch(e){ console.error('updateStreak:',e); }
+}
 
 /* 累计打卡天数：所有打卡的日期总数（不去重连续） */
 function calcStreak(){
