@@ -103,7 +103,7 @@
 <div class="app">
   <div class="topbar">
     <div class="greeting-row">
-      <h1 class="greeting"><span class="emoji" id="greetEmoji">🌅</span><span id="greetText">早上好呀~</span></h1>
+      <h1 class="greeting"><span class="emoji" id="greetEmoji">🥷</span><span id="greetText">训练师你好呀！欢迎回来～</span></h1>
       <div class="greeting-sub">
         <span id="dateText">📅 2026年8月1日 周六</span>
         <span class="encourage">💭 <span id="encourageText">水跃闪亮，准备好特训啦！</span></span>
@@ -129,12 +129,14 @@
       <div class="progress">今日完成 <b id="doneCount">0</b>/<span id="totalCount">0</span> 项<span class="pct" id="pctText">0%</span></div>
       <div class="progress" style="font-size:12px;color:#5a8ab5">累计完成 <b id="totalDone">0</b> 项任务</div>
       <div id="taskList"></div>
-      <button class="reset-btn" id="resetTodayBtn" onclick="resetToday()">🔄 重置今日打卡（长按清空全部）</button>
       <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="reset-btn" style="width:auto;flex:1;margin:0" onclick="exportData()">📤 导出备份</button>
-        <button class="reset-btn" style="width:auto;flex:1;margin:0" onclick="document.getElementById('importFile').click()">📥 导入恢复</button>
+        <button class="reset-btn" style="width:auto;flex:1;margin:0" onclick="resetToday()">🔄 重置今日</button>
+        <button class="reset-btn" style="width:auto;flex:1;margin:0" onclick="exportData()">📤 导出</button>
+        <button class="reset-btn" style="width:auto;flex:1;margin:0" onclick="document.getElementById('importFile').click()">📥 导入</button>
         <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
       </div>
+      <button class="reset-btn" id="resetTodayBtn" style="margin-top:8px;background:#ffe3e3;color:#b00020;border:1px solid #ffb3b3">🗑️ 清空全部数据（需确认）</button>
+      <div style="font-size:12px;color:#9ab8d5;text-align:center;margin:4px 0 4px">清空会删除所有打卡、星星和宠物，操作前请先导出备份</div>
     </div>
     <div class="side">
       <div class="pet-card">
@@ -147,7 +149,7 @@
         <div class="bubble" id="petBubble">小训练师加油！累计完成 0 项任务，再完成 5 项就升级啦！</div>
       </div>
       <div class="shop">
-        <h3>🏪 道具商店</h3>
+        <h3>🏪 道具商店 <span id="shopBalance" style="font-size:13px;color:#c97000;font-weight:normal"></span></h3>
         <div class="shop-grid" id="shopGrid">
           <div class="good"><div class="emoji">🍬</div><div class="gname">宝可方块</div><div class="gprice">⭐6</div></div>
           <div class="good"><div class="emoji">🍎</div><div class="gname">树果</div><div class="gprice">⭐4</div></div>
@@ -269,7 +271,9 @@ function load(){
   }catch(e){ perm = {}; }
   if(!perm.pet) perm.pet = { ...CONFIG.pet };
   if(perm.totalDone === undefined) perm.totalDone = 0;
-  if(perm.totalStars === undefined) perm.totalStars = 18; // 初始赠送 18 颗星星
+  if(perm.totalStars === undefined) perm.totalStars = 18; // 初始赠送 18 颗星星（累计获得）
+  if(perm.spent === undefined) perm.spent = 0;
+  if(perm.points === undefined) perm.points = perm.totalStars - perm.spent; // 可用星星=累计-已花，兼容旧数据
   if(!perm.checkDates){
     // 初始已打卡 1 天（今天）
     perm.checkDates = [todayStr()];
@@ -286,11 +290,12 @@ function load(){
   // 3. 合并：星星用累计数，打卡用今日状态
   return {
     date: today.date,
-    points: perm.totalStars,        // 星星=累计星星，不每日重置
+    points: perm.points,            // 可用星星（商店消费用，会随购买减少）
+    totalStars: perm.totalStars,    // 累计获得（成就，不减少）
+    spent: perm.spent,
     done: today.done,
     pet: perm.pet,
     totalDone: perm.totalDone,
-    totalStars: perm.totalStars,
     checkDates: perm.checkDates
   };
 }
@@ -301,11 +306,13 @@ function save(){
     date: state.date,
     done: state.done
   }));
-  // 保存永久数据（星星=累计星星）
+  // 保存永久数据（累计星星 + 可用星星 + 已花费 分开存）
   localStorage.setItem(PERM_KEY, JSON.stringify({
     pet: state.pet,
     totalDone: state.totalDone,
     totalStars: state.totalStars,
+    points: state.points,
+    spent: state.spent || 0,
     checkDates: state.checkDates
   }));
 }
@@ -392,7 +399,8 @@ function renderAll(){
   try{ renderTasks(); }catch(e){ console.error('renderTasks:',e); }
   try{ renderShop(); }catch(e){ console.error('renderShop:',e); }
   try{ renderPet(); }catch(e){ console.error('renderPet:',e); }
-  try{ $('points').textContent = state.points; }catch(e){}
+  try{ $('points').textContent = state.totalStars; }catch(e){}   // 累计星星=累计获得（稳定，不随购买减少）
+  try{ const sb=$('shopBalance'); if(sb) sb.textContent='可用 ⭐'+(state.points||0); }catch(e){}
   try{ $('totalDone').textContent = state.totalDone||0; }catch(e){}
   try{ updateStreak(); }catch(e){ console.error('updateStreak:',e); }
 }
@@ -407,14 +415,9 @@ function updateStreak(){
   $('streakDays').textContent = calcStreak();
 }
 
-/* 顶栏问候语 + 鼓励语 */
+/* 顶栏问候语（固定欢迎语） */
 function getGreeting(){
-  const h = new Date().getHours();
-  if(h >= 5 && h < 11) return { emoji:'🌅', text:'早上好呀~' };
-  if(h >= 11 && h < 14) return { emoji:'🌞', text:'中午好呀~' };
-  if(h >= 14 && h < 18) return { emoji:'☀️', text:'下午好呀~' };
-  if(h >= 18 && h < 22) return { emoji:'🌙', text:'晚上好呀~' };
-  return { emoji:'🌜', text:'夜深啦~' };
+  return { emoji:'🥷', text:'训练师你好呀！欢迎回来～' };
 }
 
 const ENCOURAGES = [
@@ -490,7 +493,7 @@ function toggle(subId, idx, el){
   const subTotal = (sub.tasks || (sub.groups||[]).flatMap(g=>g.tasks)).length;
   $('doneCount').textContent = total;
   $('pctText').textContent = subTotal ? Math.round(total/subTotal*100)+'%' : '0%';
-  $('points').textContent = state.points;
+  $('points').textContent = state.totalStars;   // 与统计卡一致：显示累计星星
   renderShop();
   renderPet();
 }
@@ -499,6 +502,7 @@ function buy(id){
   const g = CONFIG.shop.find(x=>x.id===id);
   if(state.points < g.price){ showModal('😅','星星不够哦～继续完成任务吧！'); return; }
   state.points -= g.price;
+  state.spent = (state.spent||0) + g.price;
   let effect = '';
   if(g.type==='food'){
     state.pet.hungry = Math.min(100, state.pet.hungry + 20);
@@ -532,6 +536,8 @@ function exportData(){
     pet: state.pet,
     totalDone: state.totalDone || 0,
     totalStars: state.totalStars || 0,
+    points: state.points || 0,
+    spent: state.spent || 0,
     exportTime: new Date().toLocaleString('zh-CN')
   };
   const json = JSON.stringify(data, null, 2);
@@ -556,14 +562,16 @@ function importData(event){
       if(data.pet) state.pet = data.pet;
       if(data.done) state.done = data.done;
       if(data.totalDone !== undefined) state.totalDone = data.totalDone;
-      if(data.totalStars !== undefined){
-        state.totalStars = data.totalStars;
-        state.points = data.totalStars;
-      }
+      // 累计星星（终身成就，稳定）
+      if(data.totalStars !== undefined) state.totalStars = data.totalStars;
+      // 可用星星：优先用备份里记录的余额；旧备份没有则回退为 累计-已花
+      if(data.points !== undefined) state.points = data.points;
+      else state.points = (data.totalStars||0) - (data.spent||0);
+      if(data.spent !== undefined) state.spent = data.spent;
       if(data.date) state.date = data.date;
       save();
       renderAll();
-      showModal('📥', `恢复成功！<br>宠物：${state.pet.name} Lv.${Math.floor((state.totalDone||0)/5)+1}<br>累计星星：${state.totalStars||0}<br>累计任务：${state.totalDone||0}`);
+      showModal('📥', `恢复成功！<br>宠物：${state.pet.name} Lv.${Math.floor((state.totalDone||0)/5)+1}<br>累计星星：${state.totalStars||0}<br>可用星星：${state.points||0}<br>累计任务：${state.totalDone||0}`);
     }catch(err){
       showModal('❌', '导入失败：文件格式不正确');
     }
@@ -572,17 +580,16 @@ function importData(event){
   event.target.value = ''; // 重置input，方便再次导入
 }
 
-let resetTimer;
-document.getElementById('resetTodayBtn').addEventListener('touchstart',()=>{
-  resetTimer = setTimeout(()=>{
+const resetBtn = document.getElementById('resetTodayBtn');
+resetBtn.addEventListener('click', ()=>{
+  if(confirm('确定要清空所有记录吗？（含宠物等级和星星，不可恢复）')){
     localStorage.removeItem(SAVE_KEY);
     localStorage.removeItem(PERM_KEY);
     state = load();
     renderAll();
-    showModal('🗑️','已清空所有记录（含宠物等级）');
-  }, 1500);
+    alert('已清空所有记录（含宠物等级）');
+  }
 });
-document.getElementById('resetTodayBtn').addEventListener('touchend',()=>clearTimeout(resetTimer));
 
 function showModal(emoji, msg){ $('mEmoji').textContent=emoji; $('mMsg').innerHTML=msg; $('modal').classList.add('show'); }
 function closeModal(){ $('modal').classList.remove('show'); }
