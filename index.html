@@ -45,8 +45,10 @@
   .item.done .label{text-decoration:line-through;color:#9ab8d5}
   .item .reward{background:#ffe6a8;color:#8a6500;padding:4px 12px;border-radius:10px;font-size:15px;font-weight:bold;white-space:nowrap}
   .item .link{background:#d0e8ff;color:#2b5fa3;padding:5px 14px;border-radius:10px;font-size:14px;border:none;cursor:pointer;text-decoration:none;white-space:nowrap}
-  /* 右侧宠物+商店：宠物固定，商店单独滚动 */
-  .side{position:sticky;top:14px;align-self:start}
+  /* 右侧宠物+商店：两张独立卡片纵向排列 */
+  .side{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 28px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .side::-webkit-scrollbar{width:4px}
+  .side::-webkit-scrollbar-thumb{background:#b0d0f0;border-radius:2px}
   .pet-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 3px 8px rgba(43,95,163,.08);margin-bottom:12px}
   .pet-card .avatar{font-size:80px;line-height:1;filter:drop-shadow(0 2px 4px rgba(255,200,0,.4))}
   .pet-card .name{font-weight:bold;color:#1a4a7a;margin-top:4px;font-size:20px}
@@ -58,12 +60,9 @@
   .pet-card .bar.mood i{background:linear-gradient(90deg,#ffd84d,#ffb800)}
   .pet-card .bar.power i{background:linear-gradient(90deg,#5a9cef,#2b5fa3)}
   .pet-card .bubble{background:#fff4d0;border-radius:10px;padding:10px;font-size:14px;color:#1a4a7a;margin-top:8px;line-height:1.5;border:1px solid #ffe6a8}
-  /* 商店：标题固定，商品列表滚动 */
+  /* 商店：独立卡片，不再内部滚动 */
   .shop{background:#fff;border-radius:14px;padding:12px;box-shadow:0 3px 8px rgba(43,95,163,.08)}
   .shop h3{margin:0 0 8px;font-size:18px;color:#1a4a7a;display:flex;align-items:center;gap:6px}
-  .shop-scroll{max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:4px}
-  .shop-scroll::-webkit-scrollbar{width:4px}
-  .shop-scroll::-webkit-scrollbar-thumb{background:#b0d0f0;border-radius:2px}
   .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .good{background:#eef6ff;border-radius:12px;padding:10px;text-align:center;cursor:pointer;transition:.2s}
   .good:active{transform:scale(.95)}
@@ -88,14 +87,12 @@
     .subj-btn .icon{font-size:24px}
     .subj-btn .text{font-size:16px}
     .side{position:static;max-height:none;overflow:visible}
-    .shop-scroll{max-height:none;overflow:visible}
     .pet-card .avatar{font-size:88px}
   }
   /* iPad竖版：两栏（学科窄 + 任务宽 + 侧栏单列放在底部） */
   @media (min-width:601px) and (max-width:900px){
     .layout{grid-template-columns:130px 1fr;gap:12px}
     .side{grid-column:1/3;position:static;max-height:none;overflow:visible;display:grid;grid-template-columns:1fr 1.4fr;gap:12px;align-items:start}
-    .shop-scroll{max-height:none;overflow:visible}
   }
 </style>
 </head>
@@ -148,9 +145,7 @@
       </div>
       <div class="shop">
         <h3>🏪 道具商店</h3>
-        <div class="shop-scroll">
-          <div class="shop-grid" id="shopGrid"></div>
-        </div>
+        <div class="shop-grid" id="shopGrid"></div>
       </div>
     </div>
   </div>
